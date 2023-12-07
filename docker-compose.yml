@@ -1,0 +1,60 @@
+version: '3.9'
+
+volumes:
+  postgres_data_: {}
+  redis:
+    driver: local
+
+networks:
+    mediatrexample:
+        driver: bridge
+
+services:
+  mediatrexample.auth-microservice:
+    container_name: auth-microservice
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    env_file:
+      - .env.development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/auth-microservice/node_modules
+    command: yarn start:dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - mediatrexample
+  redis:
+    container_name: redis
+    restart: always
+    image: redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PORT=6379
+    volumes:
+      - redis:/data
+    networks:
+      - mediatrexample
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+  postgres:
+    container_name: postgres
+    image: postgres:14.5-alpine
+    restart: always
+    env_file:
+      - .env.development
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: '111'
+      POSTGRES_DB: 'auth'
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data_:/var/lib/postgresql/data_
+    networks:
+      - mediatrexample
