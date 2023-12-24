@@ -2,7 +2,7 @@
 
 ## Description
 
-[Auth microservice](https://girlab.com) for microservices architecture.
+Auth microservice for microservices architecture.
 
 ## Configuration
 
